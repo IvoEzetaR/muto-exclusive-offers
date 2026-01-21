@@ -5,6 +5,7 @@ import { z } from "zod";
 const formSchema = z.object({
   nombre: z.string().trim().min(2, "El nombre debe tener al menos 2 caracteres").max(100, "El nombre es muy largo"),
   whatsapp: z.string().trim().min(8, "Número de WhatsApp inválido").max(20, "Número muy largo").regex(/^[\d\s+()-]+$/, "Solo números y símbolos válidos"),
+  email: z.string().trim().email("Correo electrónico inválido"),
   cumpleanos: z.string().optional(),
 });
 
@@ -18,6 +19,7 @@ export const ContactForm = () => {
   const [formData, setFormData] = useState<FormData>({
     nombre: "",
     whatsapp: "",
+    email: "",
     cumpleanos: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
@@ -60,6 +62,7 @@ export const ContactForm = () => {
         body: JSON.stringify({
           nombre: result.data.nombre,
           whatsapp: result.data.whatsapp,
+          email: result.data.email,
           cumpleanos: result.data.cumpleanos || null,
           timestamp: new Date().toISOString(),
         }),
@@ -70,7 +73,7 @@ export const ContactForm = () => {
         description: "Pronto recibirás nuestras promociones exclusivas.",
       });
 
-      setFormData({ nombre: "", whatsapp: "", cumpleanos: "" });
+      setFormData({ nombre: "", whatsapp: "", email: "", cumpleanos: "" });
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -129,6 +132,28 @@ export const ContactForm = () => {
         )}
       </div>
 
+      {/* Email */}
+      <div className="space-y-2">
+        <label htmlFor="email" className="block text-sm font-medium text-foreground/90">
+          Correo Electrónico <span className="text-accent">*</span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="ejemplo@correo.com"
+          className={`w-full px-4 py-3 bg-form-bg border rounded-lg text-foreground placeholder:text-muted-foreground/60 transition-all duration-200 focus:border-form-focus ${
+            errors.email ? "border-destructive" : "border-form-border"
+          }`}
+          disabled={isSubmitting}
+        />
+        {errors.email && (
+          <p className="text-sm text-destructive mt-1">{errors.email}</p>
+        )}
+      </div>
+
       {/* Cumpleaños */}
       <div className="space-y-2">
         <label htmlFor="cumpleanos" className="block text-sm font-medium text-foreground/90">
@@ -168,5 +193,5 @@ export const ContactForm = () => {
         Al registrarte, aceptas recibir promociones de MUTO Resto Bar
       </p>
     </form>
-  );
+);
 };
